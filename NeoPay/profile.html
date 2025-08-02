@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profil - NeoPay</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background-color: #f5f9ff;
+      color: #000;
+      padding: 2rem;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .container {
+      max-width: 450px;
+      margin: auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #1a73e8;
+      margin-bottom: 2rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #0d59c5;
+    }
+
+    .error {
+      color: #e53935;
+      text-align: center;
+      display: none;
+      margin-top: 0.5rem;
+    }
+
+    .profile {
+      display: none;
+    }
+
+    .profile-item {
+      margin-bottom: 1rem;
+    }
+
+    .profile-item strong {
+      color: #888;
+      display: block;
+      font-size: 0.85rem;
+    }
+
+    .profile-item span {
+      font-size: 1rem;
+      color: #333;
+    }
+
+    .back-btn {
+      display: block;
+      background-color: #1a73e8;
+      color: white;
+      text-align: center;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      margin-top: 2rem;
+    }
+
+    .back-btn:hover {
+      background-color: #0d59c5;
+    }
+
+    #toggleMode {
+      margin-bottom: 1rem;
+      background-color: #444;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #toggleMode:hover {
+      background-color: #333;
+    }
+
+    /* DARK MODE */
+    body.dark-mode {
+      background-color: #1e1e1e;
+      color: #eee;
+    }
+
+    .dark-mode .container {
+      background-color: #2c2c2c;
+    }
+
+    .dark-mode input {
+      background-color: #3b3b3b;
+      color: #fff;
+      border-color: #555;
+    }
+
+    .dark-mode .profile-item span {
+      color: #eee;
+    }
+
+    .dark-mode .back-btn {
+      background-color: #0d59c5;
+    }
+
+    .dark-mode button {
+      background-color: #0d59c5;
+    }
+
+    .dark-mode button:hover {
+      background-color: #0942a2;
+      
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <button id="toggleMode" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+    <h1>Verifikasi Profil</h1>
+
+    <div id="pinForm">
+      <input type="password" id="pinInput" placeholder="Masukkan PIN kamu">
+      <button onclick="verifyPIN()">Lihat Profil</button>
+      <div class="error" id="errorMsg">PIN salah, coba lagi.</div>
+    </div>
+
+    <div class="profile" id="profileSection">
+      <div class="profile-item">
+        <strong>Nama</strong>
+        <span id="nameText">-</span>
+      </div>
+      <div class="profile-item">
+        <strong>Email</strong>
+        <span id="emailText">-</span>
+      </div>
+      <div class="profile-item">
+        <strong>ID Pengguna</strong>
+        <span id="idText">-</span>
+      </div>
+      <div class="profile-item">
+        <strong>Tanggal Daftar</strong>
+        <span id="dateText">-</span>
+      </div>
+      <div class="profile-item">
+        <strong>PIN (disensor)</strong>
+        <span id="pinText">******</span>
+      </div>
+
+      <a href="dashboard.html" class="back-btn">⬅ Kembali ke Dashboard</a>
+    </div>
+  </div>
+
+  <script>
+    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+
+    if (!userData || !userData.pin) {
+      alert("Akses ditolak. Silakan login terlebih dahulu.");
+      window.location.href = "login.html";
+    }
+
+    function verifyPIN() {
+      const inputPIN = document.getElementById("pinInput").value;
+      const errorMsg = document.getElementById("errorMsg");
+
+      if (inputPIN === userData.pin) {
+        document.getElementById("pinForm").style.display = "none";
+        document.getElementById("profileSection").style.display = "block";
+
+        document.getElementById("nameText").innerText = userData.name || "-";
+        document.getElementById("emailText").innerText = userData.email || "-";
+        document.getElementById("idText").innerText = userData.id || "-";
+        document.getElementById("dateText").innerText = userData.registered || "-";
+        document.getElementById("pinText").innerText = "****" + userData.pin.slice(-2);
+      } else {
+        errorMsg.style.display = "block";
+      }
+    }
+
+    function toggleDarkMode() {
+      const body = document.body;
+      const active = body.classList.toggle("dark-mode");
+      localStorage.setItem("darkMode", active ? "enabled" : "disabled");
+      const btn = document.getElementById("toggleMode");
+      btn.innerText = active ? "☀️ Light Mode" : "🌙 Dark Mode";
+    }
+
+    window.onload = function () {
+      if (localStorage.getItem("darkMode") === "enabled") {
+        document.body.classList.add("dark-mode");
+        const btn = document.getElementById("toggleMode");
+        if (btn) btn.innerText = "☀️ Light Mode";
+      }
+    };
+  </script>
+
+</body>
+</html>

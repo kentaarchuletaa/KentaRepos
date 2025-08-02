@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NeoPay - Login</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f9ff;
+      color: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .login-container {
+      background: white;
+      padding: 2.5rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+      width: 100%;
+      max-width: 380px;
+    }
+    h2, h3 {
+      text-align: center;
+      color: #1a73e8;
+      margin-bottom: 1.5rem;
+    }
+    input {
+      display: block;
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    input:focus {
+      outline: none;
+      border-color: #1a73e8;
+    }
+    .btn {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .btn:hover:not(:disabled) {
+      background-color: #0d59c5;
+    }
+    .btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    .error {
+      color: #e53935;
+      text-align: center;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .info-box {
+      background-color: #e6f0ff;
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+      display: none;
+      margin-top: 1rem;
+    }
+    .info-box strong {
+      color: #1a73e8;
+    }
+    .dark-toggle {
+      margin-bottom: 1rem;
+      background-color: #444;
+    }
+
+    /* DARK MODE */
+    body.dark-mode {
+      background-color: #1e1e1e;
+      color: #eee;
+    }
+    .dark-mode .login-container {
+      background-color: #2c2c2c;
+      color: #fff;
+    }
+    .dark-mode input {
+      background-color: #3b3b3b;
+      color: #fff;
+      border-color: #555;
+    }
+    .dark-mode .info-box {
+      background-color: #333;
+      color: #eee;
+    }
+    .dark-mode .btn {
+      background-color: #0d59c5;
+    }
+    .dark-mode .btn:hover {
+      background-color: #0942a2;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <button id="toggleMode" class="btn dark-toggle" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+
+    <h2>Masuk ke NeoPay</h2>
+    <input type="password" maxlength="6" id="pinInput" placeholder="Masukkan PIN">
+    <button class="btn" onclick="checkPIN()">Masuk</button>
+    <div class="error" id="errorMsg">PIN salah! Coba lagi.</div>
+
+    <hr>
+
+    <div id="registerSection">
+      <h3>Belum punya akun?</h3>
+      <input type="email" id="emailInput" placeholder="Masukkan email aktif">
+      <button class="btn" id="registerBtn" onclick="registerPIN()">Daftar Sekarang</button>
+      <div class="info-box" id="generatedPinBox">
+        PIN kamu: <strong id="generatedPin">-</strong><br>
+        Simpan PIN kamu baik-baik ya!
+      </div>
+    </div>
+
+    <hr>
+
+    <button class="btn" onclick="lupaPIN()">Lupa PIN?</button>
+    <button class="btn" style="background-color:#e53935;" onclick="resetAkun()">Reset Akun</button>
+  </div>
+
+  <script>
+    function checkPIN() {
+      const pinInput = document.getElementById("pinInput").value.trim();
+      const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+      const errorMsg = document.getElementById("errorMsg");
+
+      if (pinInput === userData.pin) {
+        errorMsg.style.display = "none";
+        window.location.href = "dashboard.html";
+      } else {
+        errorMsg.style.display = "block";
+      }
+    }
+
+    function registerPIN() {
+      const email = document.getElementById("emailInput").value.trim();
+      const existingUser = localStorage.getItem("userData");
+
+      if (existingUser) {
+        alert("Akun sudah terdaftar.");
+        return;
+      }
+
+      if (!email || !email.includes("@")) {
+        alert("Masukkan email yang valid.");
+        return;
+      }
+
+      const generatedPIN = Math.floor(100000 + Math.random() * 900000).toString();
+      const userData = {
+        email: email,
+        pin: generatedPIN,
+        name: email.split('@')[0],
+        id: "UID" + Math.floor(Math.random() * 1000000),
+        registered: new Date().toLocaleString("id-ID")
+      };
+
+      localStorage.setItem("userData", JSON.stringify(userData));
+      document.getElementById("generatedPin").innerText = generatedPIN;
+      document.getElementById("generatedPinBox").style.display = "block";
+
+      document.getElementById("registerBtn").disabled = true;
+      document.getElementById("emailInput").disabled = true;
+      alert("Akun berhasil dibuat! Simpan PIN kamu.");
+    }
+
+    function lupaPIN() {
+      const emailInput = prompt("Masukkan email kamu:");
+      const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+
+      if (emailInput === userData.email) {
+        alert("PIN kamu adalah: " + userData.pin);
+      } else {
+        alert("Email salah atau belum terdaftar.");
+      }
+    }
+
+    function resetAkun() {
+      const confirmReset = confirm("Semua data akan dihapus. Yakin?");
+      if (confirmReset) {
+        localStorage.clear();
+        alert("Akun berhasil direset.");
+        location.reload();
+      }
+    }
+
+    // Dark mode setup
+    function toggleDarkMode() {
+      const body = document.body;
+      const active = body.classList.toggle("dark-mode");
+      localStorage.setItem("darkMode", active ? "enabled" : "disabled");
+
+      const btn = document.getElementById("toggleMode");
+      btn.innerText = active ? "☀️ Light Mode" : "🌙 Dark Mode";
+    }
+
+    // On load
+    window.onload = function () {
+      const savedData = JSON.parse(localStorage.getItem("userData") || "{}");
+      if (savedData.email) {
+        document.getElementById("emailInput").value = savedData.email;
+        document.getElementById("emailInput").disabled = true;
+        document.getElementById("registerBtn").disabled = true;
+      }
+
+      // Load mode
+      const savedMode = localStorage.getItem("darkMode");
+      if (savedMode === "enabled") {
+        document.body.classList.add("dark-mode");
+        const btn = document.getElementById("toggleMode");
+        if (btn) btn.innerText = "☀️ Light Mode";
+      }
+    };
+  </script>
+
+</body>
+</html>
